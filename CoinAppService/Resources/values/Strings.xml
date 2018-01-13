@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="hello">Hello World, Click Me!</string>
+  <string name="app_name">CoinAppService</string>
+  <string name="start">Start Service</string>
+  <string name="stop">Stop Service</string>
+  <string name="callServiceMethod">Call Service Method</string>
+  <string name="manualRunMethod">Run logic manually</string>
+</resources>
