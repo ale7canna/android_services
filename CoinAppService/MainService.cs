@@ -8,6 +8,7 @@ using Android.Content;
 using Android.OS;
 using Android.Util;
 using Android.Widget;
+using BusinessLogic;
 using Environment = System.Environment;
 
 namespace CoinAppService
@@ -24,6 +25,8 @@ namespace CoinAppService
         private MainServiceBinder _binder;
         private int _obsCount;
         private readonly string _absolutePath = $"{Android.OS.Environment.ExternalStorageDirectory.AbsolutePath}{Path.DirectorySeparatorChar}com.ale7canna.appcoinservice{Path.DirectorySeparatorChar}";
+
+        Logic _bl = new Logic();
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
@@ -98,17 +101,18 @@ namespace CoinAppService
                 IEnumerable<string> lines = new List<string>()
                 {
                     "CAMBIO CHF/EUR",
-                    "\"Giorno e ora\";\"cambio\""
+                    "\"Giorno e ora\";\"CambiaValute\";\"Google\""
                 };
                 File.AppendAllLines(filename, lines);
             }
 
-            var pageDwnldr = new PageDownloader();
+            var cambiaValuteValute = _bl.GetCambiaValuteValue();
+            var googleValue = _bl.GetGoogleChangeValue();
 
-            var page = pageDwnldr.DownloadPage();
-            var result = page.GetChangeValue();
-
-            File.AppendAllLines(filename, new[] { $"\"{DateTime.Now.ToString("s", CultureInfo.InvariantCulture)}\";\"{result.ToString(CultureInfo.InvariantCulture)}\"" });
+            File.AppendAllLines(filename, new[]
+            {
+                $"\"{DateTime.Now.ToString("s", CultureInfo.InvariantCulture)}\";\"{cambiaValuteValute.ToString(CultureInfo.InvariantCulture)}\";\"{googleValue.ToString(CultureInfo.InvariantCulture)}\""
+            });
 
             _obsCount++;
         }

@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2009
+VisualStudioVersion = 15.0.27130.2020
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinAppService", "CoinAppService\CoinAppService.csproj", "{E3BC993C-BCBA-4D26-9631-77B81D43F341}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication", "ConsoleApplication\ConsoleApplication.csproj", "{B7293D11-D3FB-4157-AFC9-114EACFF7208}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLogic", "ClassLibrary1\BusinessLogic.csproj", "{21300446-AD67-4682-82EE-73A8941065F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,13 +18,17 @@ Global
 		{E3BC993C-BCBA-4D26-9631-77B81D43F341}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E3BC993C-BCBA-4D26-9631-77B81D43F341}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3BC993C-BCBA-4D26-9631-77B81D43F341}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{E3BC993C-BCBA-4D26-9631-77B81D43F341}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E3BC993C-BCBA-4D26-9631-77B81D43F341}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E3BC993C-BCBA-4D26-9631-77B81D43F341}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{E3BC993C-BCBA-4D26-9631-77B81D43F341}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3BC993C-BCBA-4D26-9631-77B81D43F341}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{E3BC993C-BCBA-4D26-9631-77B81D43F341}.Release|Any CPU.Deploy.0 = Debug|Any CPU
 		{B7293D11-D3FB-4157-AFC9-114EACFF7208}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B7293D11-D3FB-4157-AFC9-114EACFF7208}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B7293D11-D3FB-4157-AFC9-114EACFF7208}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B7293D11-D3FB-4157-AFC9-114EACFF7208}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7293D11-D3FB-4157-AFC9-114EACFF7208}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7293D11-D3FB-4157-AFC9-114EACFF7208}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{21300446-AD67-4682-82EE-73A8941065F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21300446-AD67-4682-82EE-73A8941065F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21300446-AD67-4682-82EE-73A8941065F8}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{21300446-AD67-4682-82EE-73A8941065F8}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
