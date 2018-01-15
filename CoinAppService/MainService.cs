@@ -12,44 +12,54 @@ using Environment = System.Environment;
 
 namespace CoinAppService
 {
-    [Service]
-    [IntentFilter(new String[] { "com.xamarin.MainService" })]
+    [Service()]
+    [IntentFilter(new [] { "com.xamarin.MainService" })]
     public class MainService : Service
     {
         static readonly string Tag = "X:" + typeof(MainService).Name;
-        static readonly int TimerWait = 10 * 60 * 1000;
+        static readonly int TimerWait = 5 * 60 * 1000;
         Timer _timer;
         DateTime _startTime;
-        bool _isStarted = false;
+        bool _isStarted;
         private MainServiceBinder _binder;
-        private int _obsCount = 0;
+        private int _obsCount;
+        private readonly string _absolutePath = $"{Android.OS.Environment.ExternalStorageDirectory.AbsolutePath}{Path.DirectorySeparatorChar}com.ale7canna.appcoinservice{Path.DirectorySeparatorChar}";
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
-            Log.Debug(Tag, $"OnStartCommand called at {_startTime}, flags={flags}, startid={startId}");
+            CheckDirectoryExist();
+
+            MyLog(Tag, $"OnStartCommand called at {_startTime}, flags={flags}, startid={startId}");
             if (_isStarted)
             {
                 TimeSpan runtime = DateTime.UtcNow.Subtract(_startTime);
-                Log.Debug(Tag, $"This service was already started, it's been running for {runtime:c}.");
+                MyLog(Tag, $"This service was already started, it's been running for {runtime:c}.");
             }
             else
             {
                 _startTime = DateTime.UtcNow;
-                Log.Debug(Tag, $"Starting the service, at {_startTime}.");
+                MyLog(Tag, $"Starting the service, at {_startTime}.");
                 Toast.MakeText(this, "The demo service has started", ToastLength.Long).Show();
 
                 _timer = new Timer(HandleTimerCallback, _startTime, 0, TimerWait);
                 _isStarted = true;
             }
-            return StartCommandResult.NotSticky;
+            return StartCommandResult.Sticky;
+        }
+
+        private void CheckDirectoryExist()
+        {
+            if (Directory.Exists(_absolutePath))
+                return;
+
+            Directory.CreateDirectory(_absolutePath);
+            MyLog(Tag, $"Folder {_absolutePath} was created successfully.");
         }
 
         public override IBinder OnBind(Intent intent)
         {
             _binder = new MainServiceBinder(this);
             return _binder;
-            // This is a started service, not a bound service, so we just return null.
-            //return null;
         }
 
 
@@ -60,23 +70,28 @@ namespace CoinAppService
             _isStarted = false;
 
             TimeSpan runtime = DateTime.UtcNow.Subtract(_startTime);
-            Log.Debug(Tag, $"Simple Service destroyed at {DateTime.UtcNow} after running for {runtime:c}.");
+            MyLog(Tag, $"Simple Service destroyed at {DateTime.UtcNow} after running for {runtime:c}.");
             base.OnDestroy();
         }
 
         void HandleTimerCallback(object state)
         {
             TimeSpan runTime = DateTime.UtcNow.Subtract(_startTime);
-            Log.Debug(Tag, $"This service has been running for {runTime:c} (since ${state}).");
+            MyLog(Tag, $"This service has been running for {runTime:c} (since ${state}).");
 
-            execLogic();
+            try
+            {
+                ExecLogic();
+            }
+            catch (Exception e)
+            {
+                MyLog(e);
+            }
         }
 
-        private void execLogic()
+        private void ExecLogic()
         {
-            var absolutePath = Android.OS.Environment.ExternalStorageDirectory.AbsolutePath;
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-            string filename = Path.Combine(absolutePath, "change.csv");
+            var filename = Path.Combine(_absolutePath, "change.csv");
 
             if (!File.Exists(filename))
             {
@@ -98,31 +113,52 @@ namespace CoinAppService
             _obsCount++;
         }
 
+        private void MyLog(Exception exc)
+        {
+            while (exc != null)
+            {
+                MyLog(Tag, exc.Message);
+                exc = exc.InnerException;
+            }
+        }
+
+        private void MyLog(string tag, string content)
+        {
+            Log.Debug(tag, content);
+            LogOnFile(content);
+        }
+
+        private void LogOnFile(string content)
+        {
+            var filename = Path.Combine(_absolutePath, "log.txt");
+            File.AppendAllLines(filename, new [] { $"{DateTime.Now:s}__{content}"});
+        }
+
         internal string GetText()
         {
-            Log.Debug(Tag, $"This service will write under followin path {Environment.GetFolderPath(Environment.SpecialFolder.Personal)}");
+            MyLog(Tag, $"This service will write under following path {Environment.GetFolderPath(Environment.SpecialFolder.Personal)}");
             return $"We attent {_obsCount} observation";
         }
 
         public void RunLogic()
         {
-            execLogic();
+            ExecLogic();
             Toast.MakeText(Application.Context, "Manually application Run.", ToastLength.Long).Show();
         }
     }
 
     public class MainServiceBinder : Binder
     {
-        MainService service;
+        readonly MainService _service;
 
         public MainServiceBinder(MainService service)
         {
-            this.service = service;
+            _service = service;
         }
 
         public MainService GetDemoService()
         {
-            return service;
+            return _service;
         }
     }
 
