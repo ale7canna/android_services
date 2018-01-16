@@ -10,8 +10,15 @@ namespace ConsoleApplication
         {
             var bl = new Logic();
 
-            Console.WriteLine(bl.GetCambiaValuteValue());
-            Console.WriteLine(bl.GetGoogleChangeValue());
+            var cambiaValuteValue = bl.GetCambiaValuteValue();
+            var xeChangeValue = bl.GetXeChangeValue();
+            Console.WriteLine(cambiaValuteValue);
+            Console.WriteLine(xeChangeValue);
+            var value = xeChangeValue - cambiaValuteValue;
+            Console.WriteLine(value);
+            Console.WriteLine((decimal)100 * value / xeChangeValue);
+
+            Console.ReadLine();
         }
     }
 }

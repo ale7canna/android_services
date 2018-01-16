@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Android.App;
 using Android.Content;
@@ -27,6 +28,27 @@ namespace CoinAppService
         private readonly string _absolutePath = $"{Android.OS.Environment.ExternalStorageDirectory.AbsolutePath}{Path.DirectorySeparatorChar}com.ale7canna.appcoinservice{Path.DirectorySeparatorChar}";
 
         Logic _bl = new Logic();
+        private PowerManager.WakeLock _wakeLock;
+        private int _wakeLockCount;
+        private object _state;
+
+        public override void OnCreate()
+        {
+            base.OnCreate();
+
+            var powerManager = (PowerManager)this.GetSystemService("power");
+            _wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "servicewakelock");
+            _wakeLock.SetReferenceCounted(false);
+        }
+
+        public void SetWakeLock()
+        {
+            if (!_wakeLock.IsHeld) return;
+
+            _wakeLock.Acquire();
+            _wakeLockCount++;
+            MyLog(Tag, "WakeLock Armed");
+        }
 
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
@@ -65,7 +87,6 @@ namespace CoinAppService
             return _binder;
         }
 
-
         public override void OnDestroy()
         {
             _timer.Dispose();
@@ -79,11 +100,10 @@ namespace CoinAppService
 
         void HandleTimerCallback(object state)
         {
-            TimeSpan runTime = DateTime.UtcNow.Subtract(_startTime);
-            MyLog(Tag, $"This service has been running for {runTime:c} (since ${state}).");
-
+            _state = state;
             try
             {
+                SetWakeLock();
                 ExecLogic();
             }
             catch (Exception e)
@@ -101,17 +121,29 @@ namespace CoinAppService
                 IEnumerable<string> lines = new List<string>()
                 {
                     "CAMBIO CHF/EUR",
-                    "\"Giorno e ora\";\"CambiaValute\";\"Google\""
+                    "\"Giorno e ora\";\"CambiaValute\";\"Xe Change\";\"Difference\";\"Diff Percentage\""
                 };
                 File.AppendAllLines(filename, lines);
             }
 
-            var cambiaValuteValute = _bl.GetCambiaValuteValue();
-            var googleValue = _bl.GetGoogleChangeValue();
+            var cambiaValuteValue = _bl.GetCambiaValuteValue();
+            var xeValue = _bl.GetXeChangeValue();
 
+            var difference = xeValue - cambiaValuteValue;
+            var diffPercentage = (decimal)100 * difference / xeValue;
+
+            var values = new[]
+            {
+                DateTime.Now.ToString("s", CultureInfo.InvariantCulture),
+                cambiaValuteValue.ToString(CultureInfo.InvariantCulture),
+                xeValue.ToString(CultureInfo.InvariantCulture),
+                difference.ToString(CultureInfo.InvariantCulture),
+                diffPercentage.ToString(CultureInfo.InvariantCulture)
+            };
+            var line = String.Join(";", values.Select(v => $"\"{v}\""));
             File.AppendAllLines(filename, new[]
             {
-                $"\"{DateTime.Now.ToString("s", CultureInfo.InvariantCulture)}\";\"{cambiaValuteValute.ToString(CultureInfo.InvariantCulture)}\";\"{googleValue.ToString(CultureInfo.InvariantCulture)}\""
+                $"{line}"
             });
 
             _obsCount++;
@@ -140,7 +172,10 @@ namespace CoinAppService
 
         internal string GetText()
         {
+            TimeSpan runTime = DateTime.UtcNow.Subtract(_startTime);
+
             MyLog(Tag, $"This service will write under following path {Environment.GetFolderPath(Environment.SpecialFolder.Personal)}");
+            MyLog(Tag, $"This service has been running for {runTime:c} (since ${_state}).");
             return $"We attent {_obsCount} observation";
         }
 
