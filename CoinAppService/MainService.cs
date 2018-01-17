@@ -36,14 +36,22 @@ namespace CoinAppService
         {
             base.OnCreate();
 
-            var powerManager = (PowerManager)this.GetSystemService("power");
+            SetupWakeLock();
+        }
+
+        private void SetupWakeLock()
+        {
+            if (_wakeLock != null)
+                return;
+
+            var powerManager = (PowerManager) this.GetSystemService("power");
             _wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "servicewakelock");
             _wakeLock.SetReferenceCounted(false);
         }
 
         public void SetWakeLock()
         {
-            if (!_wakeLock.IsHeld) return;
+            if (_wakeLock.IsHeld) return;
 
             _wakeLock.Acquire();
             _wakeLockCount++;
@@ -53,6 +61,7 @@ namespace CoinAppService
         public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
         {
             CheckDirectoryExist();
+            SetupWakeLock();
 
             MyLog(Tag, $"OnStartCommand called at {_startTime}, flags={flags}, startid={startId}");
             if (_isStarted)
